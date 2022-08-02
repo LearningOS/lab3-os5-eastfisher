@@ -196,3 +196,11 @@ pub fn translated_refmut<T>(token: usize, ptr: *mut T) -> &'static mut T {
         .unwrap()
         .get_mut()
 }
+
+pub fn convert_to_physical_addr(token: usize, virt_addr: usize) -> usize {
+    let page_table = PageTable::from_token(token);
+    let va = VirtAddr::from(virt_addr);
+    let vpn = VirtPageNum::from(va.floor());
+    let ppn = page_table.find_pte(vpn).unwrap().ppn();
+    PhysAddr::from(ppn).0 + va.page_offset()
+}
